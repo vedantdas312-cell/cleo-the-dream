@@ -1,0 +1,61 @@
+{
+  "name": "cleo",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "desktop:build": "node scripts/build-desktop.mjs",
+    "desktop:dev": "node scripts/build-desktop.mjs --launch",
+    "desktop:launch": "node scripts/launch-desktop.mjs",
+    "desktop:permissions": "node scripts/check-desktop-permissions.mjs",
+    "desktop:test": "swift run --package-path desktop CleoPresentationChecks",
+    "test": "node --test test/*.test.ts test/*.test.mjs",
+    "typecheck": "tsc --noEmit && tsc --project web/tsconfig.json",
+    "start": "node scripts/start.ts",
+    "docx:inspect": "node scripts/docx.ts inspect",
+    "docx:redline": "node scripts/docx.ts redline",
+    "docs:preview": "node scripts/docs-preview.mjs",
+    "docs:apply": "node scripts/docs-apply.mjs",
+    "athena:ask": "node scripts/athena-ask.mjs",
+    "docx:draft": "node scripts/draft.ts",
+    "lint": "node scripts/ci-lint.mjs",
+    "notepad:build": "node scripts/build-notepad.mjs",
+    "local:setup": "node scripts/local-setup.mjs",
+    "start:local": "node --env-file=.local/cleo-local.env --env-file=.local/supermemory.env scripts/start.ts",
+    "google:authorize": "node scripts/google-authorize.mjs",
+    "local:contract": "node --env-file=.local/cleo-local.env --env-file=.local/supermemory.env scripts/local-contract.ts",
+    "web:dev": "vite --config web/vite.config.ts --host 127.0.0.1",
+    "web:build": "vite build --config web/vite.config.ts",
+    "pretest": "npm run web:build"
+  },
+  "dependencies": {
+    "@openai/agents": "0.21.0",
+    "@xmldom/xmldom": "^0.9.12",
+    "diff": "^9.0.0",
+    "html-to-text": "10.0.1",
+    "jszip": "^3.10.2",
+    "pdfkit": "^0.20.2",
+    "pg": "^8.23.1",
+    "ws": "8.22.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/html-to-text": "^9.0.4",
+    "@types/node": "^26.6.6",
+    "@types/pdfkit": "^0.17.7",
+    "@types/pg": "^8.23.1",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@types/ws": "8.18.2",
+    "clsx": "^2.1.1",
+    "motion": "^14.9.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "tailwind-merge": "^3.7.0",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.5"
+  }
+}

@@ -1,0 +1,100 @@
+name: Cleo CI
+
+on:
+  push:
+    branches: [main, 'codex/**']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cleo-ci-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Backend checks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install document conversion tools
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends poppler-utils antiword catdoc
+      - run: npm ci --ignore-scripts
+      - name: Validate GitHub workflows
+        run: |
+          curl --fail --silent --show-error --location --output "$RUNNER_TEMP/actionlint.tar.gz" https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_linux_amd64.tar.gz
+          echo "8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8  $RUNNER_TEMP/actionlint.tar.gz" | sha256sum --check
+          tar -xzf "$RUNNER_TEMP/actionlint.tar.gz" -C "$RUNNER_TEMP" actionlint
+          "$RUNNER_TEMP/actionlint" -color
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm audit --audit-level=high
+
+  container:
+    name: Container and database
+    needs: quality
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Build the deployment image
+        run: docker build --build-arg CLEO_BUILD_SHA="$GITHUB_SHA" --tag cleo-ci:test .
+      - name: Check startup, access checks, Word download and persistence
+        run: node scripts/ci-container-smoke.mjs cleo-ci:test "$GITHUB_SHA"
+
+  desktop:
+    name: Mac build and presentation checks
+    needs: quality
+    runs-on: macos-15
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm run notepad:build
+      - run: swift build --package-path desktop
+      - run: npm run desktop:test
+
+  delivery:
+    name: Checked source package
+    needs: [quality, container, desktop]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Package the exact checked source
+        run: |
+          mkdir -p output/ci-delivery
+          git archive --format=tar.gz --output=output/ci-delivery/cleo-source.tar.gz HEAD
+          git rev-parse HEAD > output/ci-delivery/COMMIT.txt
+          cd output/ci-delivery
+          sha256sum cleo-source.tar.gz COMMIT.txt > SHA256SUMS
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: cleo-checked-source-${{ github.sha }}
+          path: output/ci-delivery/
+          if-no-files-found: error
+          retention-days: 7

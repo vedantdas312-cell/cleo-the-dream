@@ -1,0 +1,353 @@
+{
+  "description": "Cleo contract reading, precise redlines, Google Docs export when connected, private matter context and legal references.",
+  "transport": {
+    "method": "POST",
+    "authenticationHeader": "x-orchid-api-key",
+    "bodyEnvelope": "{ input: <tool arguments>, context: <verified existing channel context> }"
+  },
+  "tools": [
+    {
+      "name": "read_contract",
+      "path": "/tools/read_contract",
+      "description": "Read DOCX, DOC, PDF, HTML/HTM, PPTX/PPT, TXT or MD attachments from this conversation, up to 10 MB. DOCX preserves supported formatting; others become disclosed text-only Word review copies. No scanned/image OCR. Returns import warnings, exact paragraphs, editability, coverage and source hashes. Read all pages before a whole-document review.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "attachment_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "attachment_id"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "read_contract_page",
+      "path": "/tools/read_contract_page",
+      "description": "Continue reading exact paragraphs from the source_id returned by read_contract. Continue with next_offset until null.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "source_id": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "offset": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "source_id",
+          "offset"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "redline_contract",
+      "path": "/tools/redline_contract",
+      "description": "Create a separate Word copy with precise tracked changes and explanatory comments using exact source paragraphs, plus a PDF showing visible red/blue changes for phone viewing. Only editable paragraphs; one replacement per paragraph. Returns two verified files and signed transfer URLs, not delivery. Use Keiki download_url then send_file to attach both original files to the requesting conversation; keep transfer URLs internal unless the user asks for links. When Google is connected, also creates and verifies a separate extracted-text Google Doc with native suggestions and returns its exact link. Google copies are restricted by default. Only an existing account-specific sharing grant enables anyone-with-link Viewer. Return a Google link only when sharing=anyone_with_link_viewer; otherwise deliver Word/PDF attachments and use the saved meeting view. Originals and private context are not shared.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "source_id": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "source_sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "changes": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 50,
+            "items": {
+              "type": "object",
+              "properties": {
+                "paragraphId": {
+                  "type": "string",
+                  "pattern": "^p[0-9]+$"
+                },
+                "original": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 20000
+                },
+                "replacement": {
+                  "type": "string",
+                  "maxLength": 20000,
+                  "description": "Exact proposed wording. Use newline characters between new numbered sections or clause lines; never flatten them to satisfy validation. Word retains tracked line breaks; Google Docs retains paragraph breaks."
+                },
+                "reason": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 20000
+                }
+              },
+              "required": [
+                "paragraphId",
+                "original",
+                "replacement",
+                "reason"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "source_id",
+          "source_sha256",
+          "changes"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "list_review_skills",
+      "path": "/tools/list_review_skills",
+      "description": "Search reviewed workflow and template references by task, document type or jurisdiction; 20 results per page.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "offset": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_review_skill",
+      "path": "/tools/get_review_skill",
+      "description": "Load one allowlisted workflow and its references, provenance and mandatory Cleo boundaries. No execution, installation or external access.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "skill_id": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]+$"
+          }
+        },
+        "required": [
+          "skill_id"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "create_legal_draft",
+      "path": "/tools/create_legal_draft",
+      "description": "Create a new Word draft from complete user-authorised text after intake and source selection. Checks text round-trip and persistence, not legal accuracy or visual layout. Return the exact download_url as a temporary download link to the requesting conversation; it expires in 15 minutes. If an attachment is requested, use Keiki download_url then send_file to attach the original bytes. Keep draft_id associated with this document. When the user asks to hop on a call or walk through it, use draft_id with join_meeting and their Google Meet invitation; ask for a missing Meet link, not a re-upload. No Google Docs export is needed.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "draft": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 160
+              },
+              "blocks": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 500,
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "type": "string",
+                      "enum": [
+                        "heading",
+                        "paragraph"
+                      ]
+                    },
+                    "text": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 8000
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "text"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "title",
+              "blocks"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "draft"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "remember_contract_context",
+      "path": "/tools/remember_contract_context",
+      "description": "Persist exact user instructions and assistant discussion for this source before replying or redlining. Stable event IDs deduplicate retries. Record literal messages, not invented summaries. Data is private to this user and contract. Memory indexing may be pending; local messages are immediately available.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "source_id": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "events": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 10,
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 180
+                },
+                "role": {
+                  "enum": [
+                    "user",
+                    "assistant"
+                  ]
+                },
+                "channel": {
+                  "enum": [
+                    "imessage"
+                  ]
+                },
+                "text": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 12000
+                },
+                "at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "id",
+                "role",
+                "channel",
+                "text",
+                "at"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "source_id",
+          "events"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "recall_contract_context",
+      "path": "/tools/recall_contract_context",
+      "description": "Read recent literal conversation and relevant Supermemory context for this source. Older pages use older_before. Latest user corrections override old memories; no retrieved fact proves a legal conclusion.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "source_id": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "query": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "before": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "source_id"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "join_meeting",
+      "path": "/tools/join_meeting",
+      "description": "Join quietly after a fresh authenticated direct owner invitation with a Google Meet link, expressed naturally. Use the provider message ID as request_id; the server binds platform identity and exact message. Choose the current imported source_id and an explicit saved output_id when known; one unambiguous saved review can be resolved automatically. Clarify ambiguous contracts or review versions. After an accepted join with attendance pending, reply only: \"Joining, give me a min.\" Confirm being in the room only after attendance is confirmed. Explain an actual failure or uncertain outcome briefly instead of using the pending acknowledgement. Keep permissions and presentation diagnostics internal unless asked or they block the requested action. Do not append command instructions. Pending is not joined. Joining grants neither speaking nor sharing. Reuse the same request_id after uncertain outcomes. For a newly drafted document, supply draft_id from create_legal_draft instead of source_id; omit output_id. When the user says to hop on a call, use the draft being discussed and their direct Meet invitation; ask only for a missing Meet link or an ambiguous document choice. No re-upload or Google Docs copy is needed. Cleo shares the saved draft and explains one passage at a time, waiting for questions.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "source_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "output_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "meeting_url": {
+            "type": "string",
+            "pattern": "^https://meet\\.google\\.com/[a-z]{3}-[a-z]{4}-[a-z]{3}$"
+          },
+          "request_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Exact provider message ID for the direct owner message containing the Meet link."
+          },
+          "draft_id": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        },
+        "required": [
+          "meeting_url",
+          "request_id"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "meeting_status",
+      "path": "/tools/meeting_status",
+      "description": "Read the current owner meeting status and independent speaking/sharing permissions. Report provider pending/failure honestly. This read-only tool cannot grant permissions or join. Controls require the signed owner iMessage path, never model-generated commands.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "session_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "meeting_control",
+      "path": "/tools/meeting_control",
+      "description": "Call FIRST for every owner iMessage during an active meeting, including private steering and questions. Interprets the actual platform-authenticated message naturally; accepts no model-written command text. Supports combined requests, takeover/handoff, share/stop/navigation and private reminders. No fixed phrases, codes or hashtags. iMessage answers stay private unless the owner explicitly requests public speech. Spoken questions are public unless private advice is explicitly requested. Any attendee may address Cleo and control public speech/sharing; private advice stays with the authenticated owner. Ordinary guidance affects the next natural sentence boundary when ready, without interrupting current speech; text questions receive private answers from the live meeting context; stop interrupts immediately. Report actual status and failures, never infer heard audio or visible content from permission alone.",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      }
+    }
+  ]
+}
