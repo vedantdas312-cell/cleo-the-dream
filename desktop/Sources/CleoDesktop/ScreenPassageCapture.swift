@@ -30,10 +30,6 @@ enum ScreenPassageCapture {
     }
     // Ask ScreenCaptureKit itself. The older CG
     // preflight flag can disagree with the actual capture API after development rebuilds.
-    @MainActor static func checkAccess() async throws {
-        _ = try await content()
-    }
-
     private static func content() async throws -> SCShareableContent {
         do { return try await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: true) }
         catch {
