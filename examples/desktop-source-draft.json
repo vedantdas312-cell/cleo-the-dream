@@ -1,0 +1,10 @@
+{
+  "title": "Synthetic services agreement",
+  "blocks": [
+    { "kind": "heading", "text": "1. Notice" },
+    { "kind": "paragraph", "text": "Either party may terminate this agreement with sixty days of written notice." },
+    { "kind": "heading", "text": "2. Fees" },
+    { "kind": "paragraph", "text": "The monthly fee is EUR 2,000. Payment is due within thirty days." },
+    { "kind": "paragraph", "text": "This fictional contract is only for testing Cleo. It is not a real agreement." }
+  ]
+}

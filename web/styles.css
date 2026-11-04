@@ -1,0 +1,32 @@
+@import "tailwindcss";
+
+:root { font-family: Arial, Helvetica, sans-serif; color: #191b22; background: #ffffff; font-synthesis: none; }
+* { box-sizing: border-box; }
+body { margin: 0; }
+.page { max-width: 1800px; margin: auto; }
+.wordmark { max-width: 640px; margin: 40px auto 0; padding: 0 24px; }
+main { padding: 42px 24px 64px; text-align: center; }
+.intro { margin: 0 0 18px; color: #545965; font-size: 14px; }
+h1 { margin: 0; font-size: clamp(38px, 4.5vw, 58px); line-height: 1.08; letter-spacing: -.045em; font-weight: 500; }
+.description { max-width: 550px; margin: 22px auto 28px; color: #545965; font-size: 17px; line-height: 1.65; }
+.description p { margin: 0; }
+.description p + p { margin-top: 12px; }
+.text-button { display: inline-flex; gap: 12px; align-items: center; padding: 17px 23px; border-radius: 100px; background: #2458e6; color: #ffffff; text-decoration: none; font-size: 16px; transition: background .2s; }
+.text-button:hover { background: #1439ad; }
+.arrow { margin-left: 10px; font-size: 20px; line-height: 1; }
+a:focus-visible, summary:focus-visible { outline: 2px solid #2458e6; outline-offset: 6px; }
+.hint { font-size: 12px; color: #626775; margin-top: 15px; }
+.fallback { margin: 18px auto 0; max-width: 440px; font-size: 12px; color: #626775; line-height: 1.8; }
+.fallback summary { cursor: pointer; width: fit-content; margin: auto; text-underline-offset: 3px; }
+.fallback a { color: inherit; text-decoration: underline; }
+.fallback p { margin: 14px 0 0; }
+.install-note { max-width: 420px; margin: 34px auto 0; font-size: 12px; line-height: 1.7; color: #626775; }
+.install-note a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
+.landing-wordmark .hwf-top, .landing-wordmark .hwf-rule { display: none; }
+@media (max-width: 600px) {
+  .wordmark { margin-top: 28px; }
+  main { padding: 34px 24px 48px; }
+  h1 { max-width: 330px; margin-inline: auto; }
+  .description { font-size: 16px; max-width: 320px; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; scroll-behavior: auto !important; } }

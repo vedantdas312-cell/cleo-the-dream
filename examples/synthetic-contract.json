@@ -1,0 +1,29 @@
+{
+  "documentId": "offline-synthetic-acme",
+  "title": "Acme synthetic contract — not a legal template",
+  "revisionId": "offline-r1",
+  "tabs": [{
+    "tabProperties": { "tabId": "t.demo" },
+    "documentTab": {
+      "body": {
+        "content": [
+          { "startIndex": 0, "endIndex": 1, "sectionBreak": {} },
+          {
+            "startIndex": 1, "endIndex": 67,
+            "paragraph": { "elements": [{
+              "startIndex": 1, "endIndex": 67,
+              "textRun": { "content": "Either party may terminate this agreement with sixty days notice.\n" }
+            }] }
+          },
+          {
+            "startIndex": 67, "endIndex": 107,
+            "paragraph": { "elements": [{
+              "startIndex": 67, "endIndex": 107,
+              "textRun": { "content": "Payment terms remain under negotiation.\n" }
+            }] }
+          }
+        ]
+      }
+    }
+  }]
+}

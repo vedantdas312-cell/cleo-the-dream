@@ -1,0 +1,35 @@
+/* Presentation only. The renderer owns shape geometry, label fitting and timing. */
+:root {
+  color-scheme: light;
+  font: 14px -apple-system, BlinkMacSystemFont, sans-serif;
+  color: #303b35;
+  background: #fcfbf6;
+}
+* { box-sizing: border-box; }
+body { margin: 0; padding: 22px; }
+header { padding-bottom: 10px; }
+.eyebrow { font-size: 10px; letter-spacing: 2px; color: #657b70; }
+h1 {
+  font: 400 25px/1.18 Georgia, 'Times New Roman', serif;
+  letter-spacing: -0.6px;
+  color: #354332;
+  margin: 12px 0;
+  overflow-wrap: anywhere;
+}
+p, footer { font-size: 12px; color: #647460; margin: 0; line-height: 1.5; }
+main {
+  margin-top: 12px;
+  border-top: 1px solid #e1e6d9;
+  border-bottom: 1px solid #e1e6d9;
+  background-image: radial-gradient(#d5dcca 0.55px, transparent 0.55px);
+  background-size: 20px 20px;
+}
+svg { display: block; width: 100%; height: auto; overflow: visible; }
+#pen { fill: #309379; }
+footer { margin-top: 12px; }
+/* Keep renderer-selected font sizes, anchors and stroke geometry intact. */
+text { font-family: 'Chalkboard SE', 'Noteworthy', -apple-system, sans-serif; font-size: 30px; }
+path { stroke-linecap: round; stroke-linejoin: round; fill: none; stroke-width: 3.5; }
+@media (max-width: 410px) {
+  h1 { font-size: 21px; line-height: 1.25; }
+}
